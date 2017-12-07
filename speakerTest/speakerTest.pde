@@ -9,10 +9,12 @@
 
 import ddf.minim.*;
 import ddf.minim.ugens.*;
-import java.io.File;
+import java.io.*;
 import static java.lang.System.out;
-import java.util.Arrays; 
+import java.util.*; 
 import processing.sound.*; 
+import processing.serial.*;
+
 
 
 Minim minim;
@@ -25,28 +27,54 @@ Reverb reverb;
 boolean isPlayerDecreasing = true; 
 boolean isPlayer2Decreasing = false; 
 boolean startPlaying = true;
+boolean startDelay =  true;
 
 int index = 0; 
 
+String emotion = "";
+Serial port;
+
 void setup()
 {
-  size(512, 200, P3D);
+  //port = new Serial(this, Serial.list()[0], 9600);
+  //println(Serial.list()[0]);
+  //size(512, 200, P3D);
   
+   String[] lines = loadStrings("emotion.txt");
+   emotion = lines[0];
+   println(emotion);
+   //port.write(emotion);
+   //port.stop();
+                
   // we pass this to Minim so that it can load files from the data directory
   minim = new Minim(this);
-  dir = new File(dataPath(""));
-  files = dir.list(); 
-
-   
+  dir = new File(dataPath(emotion));
+  files = dir.list();
+  List<String> fileList = Arrays.asList(files); 
+  Collections.shuffle(fileList);
+  fileList.toArray(files);
 
   System.out.println(Arrays.toString(files)); 
 
-  player = minim.loadFile(files[0]);
+  String file = emotion+"/"+files[0];
+  player = minim.loadFile(file);
   player.setPan(1);  
 }
 
 void draw()
 {
+  //if (startDelay){ 
+  //  delay(1500); 
+  //  port.clear();
+  //  startDelay = false;
+  //}
+  
+  //port.write('a');
+  //if (emotion.equals("fear")) port.write('a');
+  //else if (emotion.equals("anger")) port.write('f');
+  //else if (emotion.equals("joy")) port.write('s');
+  //else if (emotion.equals("sadness")) port.write('+');
+  
   background(0);
   stroke(255);
   
@@ -96,7 +124,7 @@ void draw()
     }
     
     if (!player.isPlaying()) { 
-      String path = files[(index+1)%files.length];
+      String path = emotion+"/"+files[(index+1)%files.length];
       player = minim.loadFile(path); 
       index += 1;
       player.play(); 
